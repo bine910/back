@@ -37,39 +37,43 @@ Lê Hải Đăng - B23DCVT072 - front-end
 
 ### Tuần 1 – Khởi động
 | Nhiệm vụ | Trạng thái | Kết quả đầu ra | Ghi chú |
-|Phân tích yêu cầu & Thiết kế CSDL (ERD)|[ ]|Sơ đồ ERD|Dựa trên UI figma|
-|Khởi tạo Project Node.js & Cấu hình Docker cơ bản|[ ]|Source code base||
-|Nghiên cứu & Setup môi trường "Vibe-coding"|[ ]|IDE/Tools ready||
+|---------|-----------|---------------|--------|
+|Phân tích yêu cầu & Thiết kế CSDL (ERD)| [ ] / [x]|Sơ đồ ERD|Dựa trên UI figma|
+|Khởi tạo Project Node.js & Cấu hình Docker cơ bản| [ ] / [x]|Source code base||
+|Nghiên cứu & Setup môi trường "Vibe-coding"| [ ] / [x]|IDE/Tools ready||
 
 ---
 
 ### Tuần 2 – Triển khai cơ bản (Buổi trao đổi 1)
 | Nhiệm vụ | Trạng thái | Kết quả đầu ra | Ghi chú |
-|Xây dựng API Authentication (Đăng ký, Đăng nhập)|[ ]|API /register, /login hoạt động (JWT, Bcrypt)||
-|Khởi tạo Project Node.js & Cấu hình Docker cơ bản|[ ]|Middleware auth, admin||
-|Cấu hình PostgreSQL kết nối qua Docker|[ ]|Database chạy trên container, kết nối thành công||
+|---------|-----------|---------------|--------|
+|Xây dựng API Authentication (Đăng ký, Đăng nhập)| [ ] / [x]|API /register, /login hoạt động (JWT, Bcrypt)||
+|Khởi tạo Project Node.js & Cấu hình Docker cơ bản| [ ] / [x]|Middleware auth, admin||
+|Cấu hình PostgreSQL kết nối qua Docker| [ ] / [x]|Database chạy trên container, kết nối thành công||
 
 ---
 
 ### Tuần 3 – Mở rộng
 | Nhiệm vụ | Trạng thái | Kết quả đầu ra | Ghi chú |
-|API Quản lý danh mục & Sản phẩm (CRUD)|[ ]|API Product|--------|
-|API Bộ lọc & Tìm kiếm sản phẩm|[ ]|API Filter theo giá, size, màu (như UI thiết kế)|--------|
-|Seed dữ liệu mẫu vào Database|[ ]|DB có dữ liệu quần áo demo để test|--------|
+|---------|-----------|---------------|--------|
+|API Quản lý danh mục & Sản phẩm (CRUD)| [ ] / [x]|API Product|--------|
+|API Bộ lọc & Tìm kiếm sản phẩm| [ ] / [x]|API Filter theo giá, size, màu (như UI thiết kế)|--------|
+|Seed dữ liệu mẫu vào Database| [ ] / [x]|DB có dữ liệu quần áo demo để test|--------|
 
 
 ---
 
 ### Tuần 4 – Hoàn thiện giữa kỳ (Buổi trao đổi 2)
 | Nhiệm vụ | Trạng thái | Kết quả đầu ra | Ghi chú |
-|Tích hợp API với Frontend (Phần Home & Product)|[ ]|Hiển thị được dữ liệu từ API lên giao diện React|--------|
-|API Giỏ hàng (Cart)|[ ]|API Add to cart, Update quantity, Remove item|--------|
-|Tối ưu Docker Compose cho Dev environment|[ ]|File docker-compose.yml chạy cả BE và DB mượt mà|--------|
+|Tích hợp API với Frontend (Phần Home & Product)| [ ] / [x]|Hiển thị được dữ liệu từ API lên giao diện React|--------|
+|API Giỏ hàng (Cart)| [ ] / [x]|API Add to cart, Update quantity, Remove item|--------|
+|Tối ưu Docker Compose cho Dev environment| [ ] / [x]|File docker-compose.yml chạy cả BE và DB mượt mà|--------|
 
 ---
 
 ### Tuần 5 – Nâng cao / Tối ưu
 | Nhiệm vụ | Trạng thái | Kết quả đầu ra | Ghi chú |
+|---------|-----------|---------------|--------|
 |API Wishlist (Yêu thích)|-----------|API Checkout, Get Order History|--------|
 |API Đặt hàng (Order) & Quản lý đơn hàng|-----------|API Add/Remove Wishlist|--------|
 |Refactor code theo phong cách "Vibe-coding"|-----------|Code sạch hơn, tách Service/Controller rõ ràng|--------|
@@ -78,17 +82,19 @@ Lê Hải Đăng - B23DCVT072 - front-end
 
 ### Tuần 6 – Kiểm thử / Đánh giá (Buổi trao đổi 3)
 | Nhiệm vụ | Trạng thái | Kết quả đầu ra | Ghi chú |
-|Kiểm thử API toàn diện|[ ]|Bộ collection Postman full chức năng|--------|
-|Đóng gói Docker Image bản Production (tối ưu size)|[ ]|Docker image final|--------|
+|Kiểm thử API toàn diện| [ ] / [x]|Bộ collection Postman full chức năng|--------|
+|Đóng gói Docker Image bản Production (tối ưu size)| [ ] / [x]|Docker image final|--------|
 
 
 ---
 
 ### Tuần 7 – Hoàn thiện cuối
 | Nhiệm vụ | Trạng thái | Kết quả đầu ra | Ghi chú |
-|Viết tài liệu API (Swagger hoặc Markdown)|[ ]|Link docs API cho Frontend dễ tra cứu|--------|
-|Review lại toàn bộ tính năng so với thiết kế Globex|[ ]|Checklist chức năng hoàn thành 100%|--------|
-|Viết tài liệu API (Swagger hoặc Markdown)|[ ]|Link docs API cho Frontend dễ tra cứu|--------|
+|---------|-----------|---------------|--------|
+|Viết tài liệu API (Swagger hoặc Markdown)| [ ] / [x]|Link docs API cho Frontend dễ tra cứu|--------|
+|Review lại toàn bộ tính năng so với thiết kế Globex| [ ] / [x]|Checklist chức năng hoàn thành 100%|--------|
+|Viết tài liệu API (Swagger hoặc Markdown)| [ ] / [x]|Link docs API cho Frontend dễ tra cứu|--------|
+
 ---
 
 ### Tuần 8 – Tổng kết (Buổi trao đổi 4)
