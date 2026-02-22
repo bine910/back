@@ -65,6 +65,7 @@ Lê Hải Đăng - B23DCVT072 - front-end
 
 ### Tuần 4 – Hoàn thiện giữa kỳ (Buổi trao đổi 2)
 | Nhiệm vụ | Trạng thái | Kết quả đầu ra | Ghi chú |
+|---------|-----------|---------------|--------|
 |Tích hợp API với Frontend (Phần Home & Product)| [ ] / [x]|Hiển thị được dữ liệu từ API lên giao diện React|--------|
 |API Giỏ hàng (Cart)| [ ] / [x]|API Add to cart, Update quantity, Remove item|--------|
 |Tối ưu Docker Compose cho Dev environment| [ ] / [x]|File docker-compose.yml chạy cả BE và DB mượt mà|--------|
