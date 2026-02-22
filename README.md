@@ -23,7 +23,7 @@ internship-project-bine910 created by GitHub Classroom
  
 
 **Bài toán / nội dung áp dụng cụ thể:
-Xây dựng hệ thống Backend (RESTful API) cho website thương mại điện tử kinh doanh thời trang "Globex". Hệ thống cung cấp các API quản lý người dùng, sản phẩm, bộ lọc tìm kiếm, giỏ hàng, và đơn hàng. Áp dụng công nghệ Containerization (Docker) để triển khai và quy trình "vibe-coding" (tận dụng các công cụ AI hiện đại) để tối ưu hóa tốc độ và chất lượng mã nguồn.
+Xây dựng hệ thống Backend (RESTful API) cho website thương mại điện tử kinh doanh thời trang "Globex". Hệ thống cung cấp các API quản lý người dùng, sản phẩm, bộ lọc tìm kiếm, giỏ hàng, và đơn hàng. Áp dụng công nghệ Containerization (Docker) để triển khai và quy trình "vibe-coding" bằng Google AntiGravity để tối ưu hóa tốc độ và chất lượng mã nguồn.
 
 Link GitHub repository (nếu có): https://github.com/bine910/ttcs 
 Làm việc nhóm (nếu có):
