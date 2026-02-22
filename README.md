@@ -73,6 +73,7 @@ Lê Hải Đăng - B23DCVT072 - front-end
 |API Wishlist (Yêu thích)|-----------|API Checkout, Get Order History|--------|
 |API Đặt hàng (Order) & Quản lý đơn hàng|-----------|API Add/Remove Wishlist|--------|
 |Refactor code theo phong cách "Vibe-coding"|-----------|Code sạch hơn, tách Service/Controller rõ ràng|--------|
+
 ---
 
 ### Tuần 6 – Kiểm thử / Đánh giá (Buổi trao đổi 3)
