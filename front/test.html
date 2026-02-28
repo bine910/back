@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Drag circle</title>
+<style>
+    body {
+        height: 100vh;
+        margin: 0;
+        background: #f2f2f2;
+    }
+
+    .circle {
+        width: 80px;
+        height: 80px;
+        background: red;
+        border-radius: 50%;
+        position: absolute;
+        left: 100px;
+        top: 100px;
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+
+<div class="circle" id="circle"></div>
+
+<script>
+const circle = document.getElementById("circle");
+
+let isDragging = false;
+
+// Khi bấm chuột vào hình tròn
+circle.addEventListener("mousedown", function (e) {
+    isDragging = true;
+});
+
+// Khi thả chuột
+document.addEventListener("mouseup", function () {
+    isDragging = false;
+});
+
+// Khi di chuyển chuột
+document.addEventListener("mousemove", function (e) {
+    if (!isDragging) return;
+
+    // Đưa tâm hình tròn tới vị trí con trỏ
+    const x = e.clientX - circle.offsetWidth / 2;
+    const y = e.clientY - circle.offsetHeight / 2;
+
+    circle.style.left = x + "px";
+    circle.style.top = y + "px";
+});
+</script>
+
+</body>
+</html>
