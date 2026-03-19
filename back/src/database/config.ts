@@ -14,5 +14,5 @@ export default new DataSource({
     database: process.env.DB_DATABASE || 'products',
     entities: ['src/entities/*.entity.ts'],
     migrations: ['src/database/migrations/*.ts'],
-    synchronize: false,
+    synchronize: true,
 });

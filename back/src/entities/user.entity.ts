@@ -6,7 +6,7 @@ import {
     UpdateDateColumn,
     OneToMany,
 } from 'typeorm';
-import { UserRole } from '../../common/enums';
+import { UserRole } from '../common/enums';
 import { UserAddress } from './user-address.entity';
 import { Wishlist } from './wishlist.entity';
 import { CartItem } from './cart-item.entity';

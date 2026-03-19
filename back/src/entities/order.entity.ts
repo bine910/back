@@ -10,9 +10,9 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { UserAddress } from './user-address.entity';
-import { OrderStatus } from '../../common/enums';
-import { PaymentStatus } from '../../common/enums';
-import { PaymentMethod } from '../../common/enums';
+import { OrderStatus } from '../common/enums';
+import { PaymentStatus } from '../common/enums';
+import { PaymentMethod } from '../common/enums';
 import { OrderItem } from './order-item.entity';
 
 @Entity('orders')
