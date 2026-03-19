@@ -55,7 +55,7 @@ Mục tiêu: Kết nối DB và quản lý biến môi trường.
 | Setup Docker cho Database | [ ] / [x] | docker-compose.yml chạy container PostgreSQL | |
 | Cấu hình ConfigModule & Biến môi trường | [ ] / [x] | Inject ConfigService đọc .env | Không hardcode |
 | Kết nối Database (TypeORM) bằng Async Provider | [ ] / [x] | Module kết nối DB thành công dùng useFactory | |
-| Entity & Repository cơ bản | [ ] / [x] | Tạo bảng User và API tạo/lấy danh sách User | Dùng migration hoặc sync (dev) |
+| Entity & Repository cơ bản | [ ] / [x] | Tạo bảng Product và API tạo/lấy danh sách Product | Dùng migration hoặc sync (dev) |
 
 ---
 

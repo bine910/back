@@ -19,7 +19,7 @@ import { ProductModule } from './modules/product/product.module';
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_DATABASE'),
         autoLoadEntities: true,
-        synchronize: true,
+        synchronize: true
       }),
       inject: [ConfigService],
     }),

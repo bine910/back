@@ -1,14 +1,13 @@
 import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
 import { ProductService } from './product.service';
+import { Product } from '../../entities/product.entity';
 
 @Controller('products')
 export class ProductController {
-
-  // 🔥 Dependency Injection
-  constructor(private readonly productService: ProductService) {}
+  constructor(private readonly productService: ProductService) { }
 
   @Post()
-  create(@Body() body) {
+  create(@Body() body: Partial<Product>) {
     return this.productService.create(body);
   }
 
@@ -23,7 +22,7 @@ export class ProductController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() body) {
+  update(@Param('id') id: string, @Body() body: Partial<Product>) {
     return this.productService.update(+id, body);
   }
 

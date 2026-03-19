@@ -1,31 +1,46 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Product } from '../../entities/product.entity';
 
 @Injectable()
 export class ProductService {
-  private products: any[] = [];
+  constructor(
+    @InjectRepository(Product)
+    private readonly productRepository: Repository<Product>,
+  ) { }
 
-  create(product) {
-    this.products.push(product);
-    console.log(product);
+  async create(data: Partial<Product>): Promise<Product> {
+    const product = this.productRepository.create(data);
+    return await this.productRepository.save(product);
+  }
+
+  async findAll(): Promise<Product[]> {
+    return await this.productRepository.find({
+      relations: ['images', 'variants', 'category', 'brand'],
+      order: { created_at: 'DESC' },
+    });
+  }
+
+  async findOne(id: number): Promise<Product> {
+    const product = await this.productRepository.findOne({
+      where: { id },
+      relations: ['images', 'variants', 'category', 'brand', 'reviews'],
+    });
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
     return product;
   }
 
-  findAll() {
-    return this.products;
+  async update(id: number, data: Partial<Product>): Promise<Product> {
+    const product = await this.findOne(id);
+    this.productRepository.merge(product, data);
+    return await this.productRepository.save(product);
   }
 
-  findOne(id: number) {
-    return this.products[id];
-  }
-
-  update(id: number, data) {
-    this.products[id] = data;
-    return data;
-  }
-
-  remove(id: number) {
-    const deleted = this.products[id];
-    this.products.splice(id, 1);
-    return deleted;
+  async remove(id: number): Promise<void> {
+    const product = await this.findOne(id);
+    await this.productRepository.remove(product);
   }
 }
