@@ -1,0 +1,58 @@
+@baseUrl = http://localhost:3000
+
+### 1. Kiểm tra trạng thái Server (Ping / Health)
+GET {{baseUrl}}/ping
+
+
+# ========================================== #
+#                 USERS API                  #
+# ========================================== #
+
+### 1.1 Lấy danh sách tất cả Users
+GET {{baseUrl}}/users
+
+### 1.2 Lấy thông tin User theo ID (thay số 1 bằng ID thực tế)
+GET {{baseUrl}}/users/1
+
+### 1.3 Tạo User mới / Đăng nhập
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+    "email": "customer1@example.com",
+    "password": "hashed_pw"
+}
+
+
+# ========================================== #
+#               PRODUCTS API                 #
+# ========================================== #
+
+### 2.1 Lấy danh sách tất cả Products
+GET {{baseUrl}}/products
+
+### 2.2 Lấy thông tin Product theo ID
+GET {{baseUrl}}/products/1
+
+### 2.3 Tạo Product mới
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+    "name": "Áo thun cơ bản",
+    "slug": "ao-thun-co-ban",
+    "base_price": 150000,
+    "is_active": true
+}
+
+### 2.4 Cập nhật Product (PATCH)
+PATCH {{baseUrl}}/products/1
+Content-Type: application/json
+
+{
+    "base_price": 120000,
+    "discount_percent": 10
+}
+
+### 2.5 Xóa Product theo ID
+DELETE {{baseUrl}}/products/1

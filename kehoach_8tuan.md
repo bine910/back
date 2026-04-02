@@ -40,10 +40,10 @@ Mục tiêu: Hiểu luồng dữ liệu và cách NestJS quản lý module, IoC.
 
 | Nhiệm vụ | Trạng thái | Kết quả đầu ra (Demo/Proof of Concept) | Ghi chú |
 |---------|-----------|---------------|--------|
-| Khởi tạo project & Cấu trúc thư mục chuẩn | [ ] / [x] | Source code rỗng trên Github | Dùng Nest CLI |
-| Học Controllers & Routing | [ ] / [x] | API /ping trả về text cơ bản để test Postman | |
-| Học Providers & Dependency Injection | [ ] / [x] | ProductSerVice inject vào ProductController xử lý CRUD với mảng ảo | Tránh viết logic trong Controller |
-| Học Modules | [ ] / [x] | Tách UserModule và ProductModule, export service chéo | Hiểu tính đóng gói |
+| Khởi tạo project & Cấu trúc thư mục chuẩn | [x] / [x] | [Báo cáo Tuần 1](./docs/week1/week1.md) | Dùng Nest CLI |
+| Học Controllers & Routing | [x] / [x] | [Báo cáo Tuần 1](./docs/week1/week1.md) | |
+| Học Providers & Dependency Injection | [x] / [x] | [Báo cáo Tuần 1](./docs/week1/week1.md) | Tránh viết logic trong Controller |
+| Học Modules | [x] / [x] | [Báo cáo Tuần 1](./docs/week1/week1.md) | Hiểu tính đóng gói |
 
 ---
 
@@ -52,10 +52,10 @@ Mục tiêu: Kết nối DB và quản lý biến môi trường.
 
 | Nhiệm vụ | Trạng thái | Kết quả đầu ra | Ghi chú |
 |---------|-----------|---------------|--------|
-| Setup Docker cho Database | [ ] / [x] | docker-compose.yml chạy container PostgreSQL | |
-| Cấu hình ConfigModule & Biến môi trường | [ ] / [x] | Inject ConfigService đọc .env | Không hardcode |
-| Kết nối Database (TypeORM) bằng Async Provider | [ ] / [x] | Module kết nối DB thành công dùng useFactory | |
-| Entity & Repository cơ bản | [ ] / [x] | Tạo bảng Product và API tạo/lấy danh sách Product | Dùng migration hoặc sync (dev) |
+| Setup Docker cho Database | [x] / [x] | [Báo cáo Tuần 2](./docs/week2/week2.md) | |
+| Cấu hình ConfigModule & Biến môi trường | [x] / [x] | [Báo cáo Tuần 2](./docs/week2/week2.md) | Không hardcode |
+| Kết nối Database (TypeORM) bằng Async Provider | [x] / [x] | [Báo cáo Tuần 2](./docs/week2/week2.md) | |
+| Entity & Repository cơ bản | [x] / [x] | [Báo cáo Tuần 2](./docs/week2/week2.md) | Dùng migration hoặc sync (dev) |
 
 ---
 
@@ -64,9 +64,9 @@ Mục tiêu: Đảm bảo dữ liệu đầu vào sạch và chuẩn hóa phản
 
 | Nhiệm vụ | Trạng thái | Kết quả đầu ra | Ghi chú |
 |---------|-----------|---------------|--------|
-| Validation với DTO & Pipes | [ ] / [x] | class-validator: lỗi nếu email sai hoặc password ngắn | |
-| Xử lý ngoại lệ (Exception Filters) | [ ] / [x] | Custom filter trả JSON chuẩn khi not found | |
-| Interceptors (Response Transformation) | [ ] / [x] | Interceptor bọc response thành { data, status } | |
+| Validation với DTO & Pipes | [x] / [x] | [Báo cáo Tuần 3](./docs/week3/week3.md) | |
+| Xử lý ngoại lệ (Exception Filters) | [x] / [x] | [Báo cáo Tuần 3](./docs/week3/week3.md) | |
+| Interceptors (Response Transformation) | [x] / [x] | [Báo cáo Tuần 3](./docs/week3/week3.md) | |
 
 ---
 
@@ -75,9 +75,9 @@ Mục tiêu: Phân quyền và bảo vệ API.
 
 | Nhiệm vụ | Trạng thái | Kết quả đầu ra | Ghi chú |
 |---------|-----------|---------------|--------|
-| Authentication (Bcrypt + JWT) | [ ] / [x] | /login trả về JWT; password mã hóa | Dùng Passport/JwtModule |
-| Bảo vệ API bằng Guards | [ ] / [x] | JwtAuthGuard chặn /profile nếu không có token | |
-| Triển khai Middleware | [ ] / [x] | LoggerMiddleware in ra Method, URL, Time | |
+| Authentication (Bcrypt + JWT) | [x] / [x] | [Báo cáo Tuần 4](./docs/week4/week4.md) | Dùng Passport/JwtModule |
+| Bảo vệ API bằng Guards | [x] / [x] | [Báo cáo Tuần 4](./docs/week4/week4.md) | |
+| Triển khai Middleware | [x] / [x] | [Báo cáo Tuần 4](./docs/week4/week4.md) | |
 
 ---
 

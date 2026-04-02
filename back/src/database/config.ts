@@ -2,8 +2,10 @@
 // Usage: npx typeorm migration:generate -d src/database/config.ts
 import { DataSource } from 'typeorm';
 import * as dotenv from 'dotenv';
+import * as path from 'path';
 
-dotenv.config();
+
+dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
 
 export default new DataSource({
     type: 'postgres',
@@ -14,5 +16,5 @@ export default new DataSource({
     database: process.env.DB_DATABASE || 'products',
     entities: ['src/entities/*.entity.ts'],
     migrations: ['src/database/migrations/*.ts'],
-    synchronize: true,
+    synchronize: false,
 });
