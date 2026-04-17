@@ -22,5 +22,4 @@ Tuần 6 tập trung nối Cursor với GitHub qua MCP (PAT) và mô tả quy tr
   4. `git push -u origin HEAD`
   5. (Tuỳ chọn) Mở PR trên GitHub — có thể dùng MCP hoặc UI web.
 - **An toàn:** Xem lại diff trước khi push; không đưa `.env` hoặc PAT vào commit (đã có `.gitignore` gốc repo cho `.env` và log verify).
-- **Minh chứng:**
-  ![Workflow branch commit push](./assets/git-workflow-week6.png)
+
