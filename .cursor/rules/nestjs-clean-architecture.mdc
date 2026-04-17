@@ -1,0 +1,23 @@
+---
+description: Clean Architecture & module layout cho backend NestJS (Globex / ttcs)
+globs: back/src/**/*.ts
+alwaysApply: false
+---
+
+# NestJS — Clean Architecture (tóm tắt áp dụng)
+
+## Cấu trúc feature
+- Mỗi nghiệp vụ một module dưới `back/src/modules/<feature>/`.
+- Thứ tự phụ thuộc: **Entity → DTO → Service → Controller → Module**; migration nằm `back/src/database/migrations/`.
+
+## Trách nhiệm từng lớp
+- **Controller**: nhận HTTP, gọi service, không chứa business logic, không query DB trực tiếp.
+- **Service**: business logic; inject `Repository<Entity>` hoặc custom repository — không dùng `getRepository()` global.
+- **DTO**: mọi input có `class-validator` + `@ApiProperty` / `@ApiPropertyOptional` (Swagger).
+- **Entity**: cột DB `snake_case` (`name: 'col_name'}`), bảng số nhiều; có `created_at` / `updated_at`; `@Index()` cho cột hay lọc.
+
+## TypeScript
+- Strict mode, không `any`; `async/await`; file/folder `kebab-case`, class `PascalCase`.
+
+## Chi tiết đầy đủ
+- Tham chiếu thêm: `back/.cursorrules`, skill tổng `cursor/rules/SKILL.md` (chỉ mở khi cần template dài).

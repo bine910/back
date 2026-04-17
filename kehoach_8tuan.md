@@ -1,6 +1,6 @@
 # internship-project-bine910
 internship-project-bine910 created by GitHub Classroom
-# Thực tập Cơ sở – Kế hoạch & Tiến độ 08 Tuần
+# Thực tập Cơ sở – Kế hoạch & Tiến độ 10 Tuần
 
 ---
 
@@ -19,7 +19,7 @@ internship-project-bine910 created by GitHub Classroom
 - [x] Kỹ năng mới / trend
 - [] Nghiên cứu / đề tài / dự án
 
-**1–3 kỹ năng chính:**Backend-Nodejs,vibe-coding bằng antigravity,docker  
+**1–3 kỹ năng chính:**Backend-Nodejs,vibe-coding ,docker  
  
 
 **Bài toán / nội dung áp dụng cụ thể:**
@@ -30,7 +30,7 @@ Làm việc nhóm (nếu có):
 Lê Hải Đăng - B23DCVT072 - front-end
 ---
 
-## 3. Kế hoạch thực hiện 08 tuần
+## 3. Kế hoạch thực hiện 10 tuần
 
 > Mỗi tuần: **2–4 nhiệm vụ cụ thể**, có **kết quả đầu ra rõ ràng**  
 > (file / link / screenshot / demo URL)
@@ -81,7 +81,28 @@ Mục tiêu: Phân quyền và bảo vệ API.
 
 ---
 
-### Tuần 5 – Bắt đầu làm Product
+### Tuần 5 – Quản lý Ngữ cảnh & Tiêu chuẩn hóa với Agent Skills
+Mục tiêu: Áp dụng tiêu chuẩn Agent Skills để đóng gói các quy tắc lập trình NestJS, giúp tối ưu hóa giới hạn Token và định hướng AI luôn code chuẩn theo kiến trúc dự án.
+
+| Nhiệm vụ | Trạng thái | Kết quả đầu ra | Ghi chú |
+|---------|-----------|---------------|--------|
+| Định nghĩa Bộ Kỹ năng (Agent Skills) cho Backend | [x] / [x] | [Báo cáo Tuần 5](./docs/week5/week5.md) — `.cursor/rules/*.mdc` (Clean Architecture, REST API, unit test, code review). | Đảm bảo AI không sinh code rác hoặc sai convention. |
+| Tối ưu hóa Token & Quản lý Context (Load on-demand) | [x] / [x] | [Báo cáo Tuần 5](./docs/week5/week5.md) — bảng so sánh ước lượng tải ngữ cảnh gộp vs tách skill. | Tránh lỗi AI bị "quên" context khi vượt quá giới hạn token (VD: 176k của Opus). |
+| Đóng gói Workflow tự động hóa bằng Script | [x] / [x] | [Báo cáo Tuần 5](./docs/week5/week5.md) — `scripts/verify-backend.*` + hook `stop` trong `.cursor/hooks.json`. | |
+
+---
+
+### Tuần 6 – Tích hợp Hệ thống ngoài & Tự động hóa với MCP (Model Context Protocol)
+Mục tiêu: Kết nối Cursor (AI Agent) với các công cụ quản lý mã nguồn (GitHub) để tạo ra một luồng làm việc khép kín không cần chuyển đổi ứng dụng.
+
+| Nhiệm vụ | Trạng thái | Kết quả đầu ra | Ghi chú |
+|---------|-----------|---------------|--------|
+| Cài đặt & Cấu hình MCP Server cho IDE | [x] / [x] | [Báo cáo Tuần 6](./docs/week6/week6.md) + [`mcp-github.example.json`](./docs/week6/mcp-github.example.json) (GitHub MCP + PAT). | Setup hạ tầng giao tiếp cho AI. |
+| Workflow đẩy code tự động (AI Git Management) | [x] / [x] | [Báo cáo Tuần 6](./docs/week6/week6.md) — quy trình branch / commit / push qua Agent + MCP hoặc shell. | Hoàn thiện quy trình Vibe-coding end-to-end. |
+
+---
+
+### Tuần 7 – Bắt đầu làm Product
 Mục tiêu: Áp dụng kiến thức để code nghiệp vụ lõi.
 
 | Nhiệm vụ | Trạng thái | Kết quả đầu ra | Ghi chú |
@@ -93,7 +114,7 @@ Mục tiêu: Áp dụng kiến thức để code nghiệp vụ lõi.
 
 ---
 
-### Tuần 6 – Tích hợp Frontend & Luồng mua sắm
+### Tuần 8 – Tích hợp Frontend & Luồng mua sắm
 Mục tiêu: Hỗ trợ frontend và hoàn thiện luồng mua hàng.
 
 | Nhiệm vụ | Trạng thái | Kết quả đầu ra | Ghi chú |
@@ -104,7 +125,7 @@ Mục tiêu: Hỗ trợ frontend và hoàn thiện luồng mua hàng.
 
 ---
 
-### Tuần 7 – Đặt hàng, Đóng gói & Tài liệu
+### Tuần 9 – Đặt hàng, Đóng gói & Tài liệu
 | Nhiệm vụ | Trạng thái | Kết quả đầu ra | Ghi chú |
 |---------|-----------|---------------|--------|
 | API Đặt hàng (Checkout) & Lịch sử | [ ] / [x] | Tạo Order, cập nhật trạng thái đơn | |
@@ -113,7 +134,7 @@ Mục tiêu: Hỗ trợ frontend và hoàn thiện luồng mua hàng.
 
 ---
 
-### Tuần 8 – Tổng kết
+### Tuần 10 – Tổng kết
 | Nhiệm vụ | Trạng thái | Kết quả đầu ra | Ghi chú |
 |---------|-----------|---------------|--------|
 | Review code & Refactor | [ ] / [x] | Code sạch, xử lý edge-cases | Vibe-coding |

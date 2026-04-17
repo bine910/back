@@ -1,0 +1,377 @@
+# Cursor Vibe-Coding Principles
+# Stack: NestJS (Backend) · React (Frontend) · PostgreSQL + TypeORM
+
+---
+
+## 🏗️ PROJECT STRUCTURE
+
+### NestJS Backend
+```
+src/
+├── modules/
+│   └── [feature]/
+│       ├── [feature].module.ts
+│       ├── [feature].controller.ts
+│       ├── [feature].service.ts
+│       ├── [feature].repository.ts      # Custom repo nếu cần
+│       ├── dto/
+│       │   ├── create-[feature].dto.ts
+│       │   ├── update-[feature].dto.ts
+│       │   └── query-[feature].dto.ts
+│       └── entities/
+│           └── [feature].entity.ts
+├── common/
+│   ├── decorators/
+│   ├── filters/                         # Exception filters
+│   ├── guards/
+│   ├── interceptors/
+│   ├── pipes/
+│   └── utils/
+├── config/
+│   └── *.config.ts
+└── database/
+    └── migrations/
+```
+
+### React Frontend
+```
+src/
+├── components/
+│   ├── ui/                              # Dumb/presentational components
+│   └── [feature]/                       # Feature-specific components
+├── pages/ (hoặc app/ nếu dùng router)
+├── hooks/                               # Custom hooks
+├── services/                            # API calls (axios/fetch)
+├── store/                               # State management
+├── types/                               # TypeScript interfaces/types
+└── utils/
+```
+
+---
+
+## 📐 CODE STYLE & STRUCTURE
+
+### Nguyên tắc chung
+- Dùng **TypeScript strict mode** ở cả backend và frontend
+- Tên file: `kebab-case` cho tất cả file/folder
+- Tên class: `PascalCase`
+- Tên biến/function: `camelCase`
+- Tên constant: `UPPER_SNAKE_CASE`
+- Không dùng `any` — dùng `unknown` hoặc define type rõ ràng
+- Prefer `async/await` over raw Promise chains
+- Tối đa **300 dòng/file** — nếu vượt thì tách module
+
+### NestJS Conventions
+- Mỗi feature = 1 module riêng biệt (separation of concerns)
+- Service chỉ chứa **business logic**, không query DB trực tiếp → dùng Repository
+- Controller chỉ nhận request, validate, và gọi service — không chứa logic
+- Dùng `class-validator` + `class-transformer` cho tất cả DTO
+- Luôn dùng `@ApiTags`, `@ApiOperation`, `@ApiResponse` (Swagger) cho mọi endpoint
+- Inject dependency qua constructor, không dùng global variable
+
+```typescript
+// ✅ ĐÚNG
+@Injectable()
+export class UsersService {
+  constructor(
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+  ) {}
+}
+
+// ❌ SAI
+const repo = getRepository(User); // Không dùng cách này
+```
+
+### React Conventions
+- Dùng **functional components** + hooks, không dùng class component
+- Tên component: `PascalCase`, tên file khớp với tên component
+- Mỗi component 1 file riêng
+- Custom hooks bắt đầu bằng `use`
+- Không gọi API trực tiếp trong component — tách ra `services/` hoặc dùng custom hook
+- Dùng `React.FC` hoặc khai báo props interface rõ ràng
+
+```typescript
+// ✅ ĐÚNG
+interface UserCardProps {
+  userId: string;
+  onSelect: (id: string) => void;
+}
+
+const UserCard: React.FC<UserCardProps> = ({ userId, onSelect }) => { ... }
+
+// ❌ SAI
+const UserCard = (props: any) => { ... }
+```
+
+### TypeORM Conventions
+- Mỗi entity có `created_at`, `updated_at` dùng `@CreateDateColumn`, `@UpdateDateColumn`
+- Dùng `snake_case` cho tên cột DB, `camelCase` cho property TypeScript
+- Luôn dùng **migration** để thay đổi schema, không dùng `synchronize: true` ở production
+- Dùng `@Index` cho các cột thường xuyên query/filter
+
+```typescript
+@Entity('users')
+export class User {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ name: 'full_name' })
+  fullName: string;
+
+  @Column({ unique: true })
+  @Index()
+  email: string;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
+}
+```
+
+---
+
+## 🌐 API DESIGN (REST)
+
+### URL Convention
+- Dùng **plural nouns**, không dùng verbs trong URL
+- `kebab-case` cho multi-word resource
+- Versioning bắt buộc: `/api/v1/...`
+
+```
+GET    /api/v1/users              # Lấy danh sách
+GET    /api/v1/users/:id          # Lấy chi tiết
+POST   /api/v1/users              # Tạo mới
+PATCH  /api/v1/users/:id          # Cập nhật một phần
+PUT    /api/v1/users/:id          # Thay thế toàn bộ (ít dùng)
+DELETE /api/v1/users/:id          # Xoá
+
+GET    /api/v1/users/:id/orders   # Nested resource
+```
+
+### Request / Response Format
+- Luôn trả về **consistent response shape**:
+
+```typescript
+// Success
+{
+  "success": true,
+  "data": { ... },
+  "meta": {                        // Cho pagination
+    "total": 100,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 5
+  }
+}
+
+// Error
+{
+  "success": false,
+  "error": {
+    "code": "USER_NOT_FOUND",
+    "message": "User with id xyz not found",
+    "statusCode": 404
+  }
+}
+```
+
+- Dùng **HTTP status codes** đúng chuẩn:
+  - `200` OK, `201` Created, `204` No Content
+  - `400` Bad Request, `401` Unauthorized, `403` Forbidden
+  - `404` Not Found, `409` Conflict, `422` Unprocessable Entity
+  - `500` Internal Server Error
+
+### Query Params cho List API
+```
+GET /api/v1/users?page=1&limit=20&search=john&sortBy=createdAt&sortOrder=DESC
+```
+
+- Dùng `ParseIntPipe` cho `page`, `limit`
+- Default: `page=1`, `limit=20`, `limit` tối đa `100`
+
+---
+
+## 🔐 AUTH & SECURITY
+
+### Authentication
+- Dùng **JWT** với access token (15 phút) + refresh token (7 ngày)
+- Lưu refresh token trong `httpOnly cookie`, không lưu trong localStorage
+- Access token gửi qua `Authorization: Bearer <token>` header
+- Dùng `@nestjs/passport` + `passport-jwt`
+
+```typescript
+// Guard áp dụng toàn app mặc định
+@UseGuards(JwtAuthGuard)
+@Controller('users')
+export class UsersController {}
+
+// Endpoint public thì dùng decorator riêng
+@Public()
+@Post('login')
+login(@Body() dto: LoginDto) {}
+```
+
+### Authorization (RBAC)
+- Dùng Enum cho roles: `ADMIN`, `USER`, `MODERATOR`...
+- Dùng custom decorator `@Roles()` + `RolesGuard`
+- Không hardcode role check trong service — luôn dùng guard
+
+### Security Checklist
+- Dùng `helmet` middleware cho HTTP headers
+- Dùng `throttler` (rate limiting) cho tất cả public endpoints
+- Validate và sanitize **toàn bộ** input từ client (DTO + `ValidationPipe`)
+- Không bao giờ trả về `password` hay sensitive fields trong response — dùng `@Exclude()`
+- Dùng `bcrypt` (cost factor ≥ 12) để hash password
+- Dùng environment variables cho secrets — không hardcode
+- Enable CORS chỉ cho domain được phép
+
+```typescript
+// app.module.ts — Global validation pipe
+app.useGlobalPipes(new ValidationPipe({
+  whitelist: true,         // Strip unknown properties
+  forbidNonWhitelisted: true,
+  transform: true,
+}));
+```
+
+### Frontend Security
+- Không lưu JWT access token trong localStorage — dùng memory (Zustand/Context)
+- Dùng axios interceptor để tự động refresh token khi nhận 401
+- Sanitize mọi nội dung render từ user input (tránh XSS)
+
+---
+
+## 🚨 ERROR HANDLING & LOGGING
+
+### NestJS Exception Handling
+- Dùng **Global Exception Filter** để handle tất cả errors
+- Dùng built-in NestJS exceptions: `NotFoundException`, `BadRequestException`, `UnauthorizedException`, `ForbiddenException`, `ConflictException`
+- Tạo custom business exceptions kế thừa từ `HttpException`
+
+```typescript
+// ✅ ĐÚNG — throw exception rõ ràng
+async findOne(id: string): Promise<User> {
+  const user = await this.usersRepository.findOne({ where: { id } });
+  if (!user) {
+    throw new NotFoundException(`User with id ${id} not found`);
+  }
+  return user;
+}
+
+// ❌ SAI — return null và để controller xử lý
+async findOne(id: string): Promise<User | null> {
+  return this.usersRepository.findOne({ where: { id } });
+}
+```
+
+### Logging
+- Dùng **NestJS built-in Logger** hoặc `winston` + `nest-winston`
+- Log levels: `error`, `warn`, `log` (info), `debug`, `verbose`
+- Bắt buộc log: request vào (method + URL), lỗi 5xx, DB errors, auth failures
+- Không log: passwords, tokens, sensitive PII
+- Format log: JSON ở production, readable ở development
+
+```typescript
+@Injectable()
+export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
+  async create(dto: CreateUserDto): Promise<User> {
+    this.logger.log(`Creating user with email: ${dto.email}`);
+    try {
+      const user = await this.usersRepository.save(dto);
+      this.logger.log(`User created successfully: ${user.id}`);
+      return user;
+    } catch (error) {
+      this.logger.error(`Failed to create user: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+}
+```
+
+### React Error Handling
+- Dùng **Error Boundary** cho các section quan trọng của UI
+- Tạo global axios interceptor để handle lỗi HTTP tập trung
+- Hiển thị error message thân thiện với user — không expose technical details
+- Dùng `try/catch` trong async functions, không để unhandled promise rejection
+
+---
+
+## 🌿 GIT & COMMIT CONVENTION
+
+### Branch Strategy (GitHub Flow)
+```
+main           # Production-ready code, protected
+develop        # Integration branch
+feature/...    # Tính năng mới
+fix/...        # Bug fixes
+hotfix/...     # Urgent production fixes
+refactor/...   # Code refactoring
+chore/...      # Config, dependencies, CI/CD
+```
+
+### Commit Message (Conventional Commits)
+Format: `<type>(<scope>): <description>`
+
+```
+feat(auth): add refresh token rotation
+fix(users): resolve duplicate email validation bug
+refactor(orders): extract order calculation to service
+chore(deps): upgrade nestjs to v10.3
+docs(api): update swagger documentation for users endpoint
+test(auth): add unit tests for jwt strategy
+style(users): fix linting errors in users controller
+perf(db): add index on orders.created_at column
+```
+
+**Types:** `feat` | `fix` | `refactor` | `chore` | `docs` | `test` | `style` | `perf` | `ci`
+
+### Pull Request Rules
+- PR title theo Conventional Commits format
+- Mỗi PR chỉ làm **1 việc** — không gộp nhiều feature vào 1 PR
+- Self-review trước khi request review
+- PR description phải có: What, Why, How to test
+- Squash merge vào `develop`, no merge commit
+
+### Git Hooks (Husky)
+- `pre-commit`: lint + format check
+- `commit-msg`: validate conventional commit format
+- `pre-push`: run unit tests
+
+---
+
+## ⚡ PERFORMANCE GUIDELINES
+
+- Luôn dùng **pagination** cho list endpoints, không trả all records
+- Dùng `select` trong TypeORM để chỉ lấy fields cần thiết
+- Dùng `QueryBuilder` cho queries phức tạp nhiều join
+- Cache các data ít thay đổi bằng `@nestjs/cache-manager` (Redis)
+- React: dùng `React.memo`, `useMemo`, `useCallback` đúng chỗ (đừng over-optimize)
+- Lazy load routes và heavy components
+
+---
+
+## 🧪 TESTING (Khi cần)
+
+- Unit test cho **service layer** — mock repository
+- E2E test cho critical API flows (auth, payment...)
+- Dùng `@nestjs/testing` + `jest`
+- Test file đặt cạnh file được test: `users.service.spec.ts`
+- Coverage target: ≥ 70% cho service layer
+
+---
+
+## 🚫 NHỮNG THỨ KHÔNG BAO GIỜ LÀM
+
+- Không `console.log` trong production code — dùng Logger
+- Không commit `.env` files
+- Không dùng `synchronize: true` trong TypeORM production config
+- Không return raw DB errors ra client
+- Không để logic trong migration files ngoài schema changes
+- Không dùng `SELECT *` — luôn specify columns cần thiết
+- Không hardcode URLs, secrets, hay config values
+- Không bỏ qua TypeScript errors bằng `// @ts-ignore`

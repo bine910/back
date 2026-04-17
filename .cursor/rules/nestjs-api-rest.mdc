@@ -1,0 +1,22 @@
+---
+description: Quy tắc đặt tên REST API & versioning cho NestJS
+globs: back/**/*controller*.ts
+alwaysApply: false
+---
+
+# REST API — Naming & HTTP
+
+## URL
+- Tiền tố version: **`/api/v1/...`** (khớp `@Controller({ path: '...', version: '1' })` nếu dự án đã cấu hình versioning).
+- Resource **danh từ số nhiều**, `kebab-case` nếu nhiều từ: `/api/v1/products`, `/api/v1/order-items`.
+- Nested: `/api/v1/users/:userId/orders`.
+
+## HTTP & semantics
+- `GET` list/detail, `POST` create, `PATCH` partial update, `DELETE` xóa; `201` + body khi tạo, `204` khi xóa không body.
+- Query list: `page`, `limit`, `search`, `sortBy`, `sortOrder`; giới hạn `limit` (vd tối đa 100).
+
+## Swagger
+- Mỗi endpoint: `@ApiTags`, `@ApiOperation`, `@ApiResponse`; JWT: `@ApiBearerAuth()` + guard tương ứng.
+
+## Response
+- Khớp interceptor/filter dự án (vd bọc `{ data, status }` hoặc format chuẩn đã thống nhất trong `back/.cursorrules`).

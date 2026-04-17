@@ -1,0 +1,24 @@
+---
+description: Viết & chạy unit test NestJS (Jest) cho service/controller
+globs: back/**/*.spec.ts
+alwaysApply: false
+---
+
+# Unit test NestJS (Jest)
+
+## Vị trí & đặt tên
+- File cạnh mã nguồn: `*.spec.ts` trong `back/src/` (theo `testRegex` của `back/package.json`).
+
+## Service
+- Dùng `@nestjs/testing` `Test.createTestingModule({ imports, providers })`.
+- Mock repository: `{ provide: getRepositoryToken(Entity), useValue: { findOne, save, ... } }`.
+- Kiểm tra: happy path, `NotFoundException` / `ConflictException` khi dữ liệu không tồn tại hoặc trùng.
+
+## Controller (ít ưu tiên hơn service)
+- Mock service provider; gọi `supertest` hoặc gọi trực tiếp method nếu test đơn giản.
+
+## Lệnh
+- `cd back && npm run test` — một file: `npm run test -- path/to/file.spec.ts`.
+
+## Không làm
+- Không hardcode secret; không phụ thuộc DB thật nếu có thể mock repository.

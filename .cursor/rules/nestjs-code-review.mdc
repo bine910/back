@@ -1,0 +1,23 @@
+---
+description: Checklist review code NestJS trước khi merge (security, style, kiến trúc)
+globs: back/src/**/*.ts
+alwaysApply: false
+---
+
+# Code review — Checklist nhanh
+
+## Kiến trúc
+- [ ] Controller mỏng; logic nằm service; không query thô ngoài repository inject.
+- [ ] DTO đủ validator + Swagger cho mọi field client gửi.
+
+## An toàn
+- [ ] Endpoint nhạy cảm có guard JWT (hoặc role) đúng nghiệp vụ.
+- [ ] Không log password/token; không lộ stack trace chi tiết ra client production.
+
+## API & dữ liệu
+- [ ] URL/version đúng convention dự án; status HTTP phù hợp.
+- [ ] Migration cho thay đổi schema; không `synchronize: true` cho production.
+
+## Chất lượng
+- [ ] `npm run lint` và `npm run test` trong `back` pass.
+- [ ] Không `any` không cần thiết; xử lý null/undefined rõ ràng.
