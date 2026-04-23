@@ -14,8 +14,5 @@ export class UserController {
     findOne(@Param('id') id: number) {
         return this.userService.findOne(id);
     }
-    @Post('login')
-    async login(@Body() loginDto: LoginDto) {
-        return await this.userService.login(loginDto);
-    }
+   
 }
