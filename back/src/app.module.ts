@@ -1,4 +1,9 @@
-import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
+import {
+  Module,
+  NestModule,
+  MiddlewareConsumer,
+  RequestMethod,
+} from '@nestjs/common';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -10,7 +15,7 @@ import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true,envFilePath: '../.env' }),
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: '../.env' }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => ({
@@ -25,7 +30,7 @@ import { AuthModule } from './modules/auth/auth.module';
         migrations: ['dist/database/migrations/*.js'],
         migrationsRun: false,
         synchronize: false,
-        logging: true
+        logging: true,
       }),
       inject: [ConfigService],
     }),

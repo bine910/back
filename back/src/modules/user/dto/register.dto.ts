@@ -18,7 +18,6 @@ export class RegisterDto {
   @MaxLength(32, { message: 'Mật khẩu không được dài quá 32 ký tự' })
   password: string;
 
-
   @IsNotEmpty({ message: 'Họ tên không được bỏ trống' })
   @IsString()
   @MaxLength(255)

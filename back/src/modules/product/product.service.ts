@@ -1,17 +1,30 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { Product } from '../../entities/product.entity';
 import { ProductCardDto } from './dto/product-card.dto';
 import { ProductSuggestionDto } from './dto/product-suggestion.dto';
 import { ProductSuggestionQueryDto } from './dto/product-suggestion-query.dto';
+import {
+  ProductCardFilterQueryDto,
+  ProductCardSortBy,
+  SortOrder,
+} from './dto/product-card-filter-query.dto';
+import {
+  DiscountBucketFacetDto,
+  ProductFilterFacetsDto,
+} from './dto/product-filter-facets.dto';
+import { ProductFiltersQueryDto } from './dto/product-filters-query.dto';
+
+const FINAL_PRICE_SQL =
+  '(p.base_price::numeric * (100 - p.discount_percent) / 100)';
 
 @Injectable()
 export class ProductService {
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
-  ) { }
+  ) {}
 
   async create(data: Partial<Product>): Promise<Product> {
     const product = this.productRepository.create(data);
@@ -25,73 +38,49 @@ export class ProductService {
     });
   }
 
-  /**
-   * Danh sách card: join tối thiểu, không trả relations đầy đủ.
-   */
-  
-  async findAllCards(): Promise<ProductCardDto[]> {
-    const rows = await this.productRepository
-      .createQueryBuilder('p')
-      .leftJoin('p.brand', 'b')
-      .leftJoin(
-        'p.images',
-        'img',
-        'img.is_primary = :isPrimary',
-        { isPrimary: true },
-      )
-      .leftJoin('p.reviews', 'r')
-      .where('p.is_active = :active', { active: true })
-      .select('p.id', 'id')
-      .addSelect('p.slug', 'slug')
-      .addSelect('p.name', 'name')
-      .addSelect("COALESCE(b.name, '')", 'brand_name')
-      .addSelect('img.image_url', 'thumbnail_url')
-      .addSelect('p.base_price', 'base_price')
-      .addSelect('p.discount_percent', 'discount_percent')
-      .addSelect(
-        'ROUND((p.base_price::numeric * (100 - p.discount_percent) / 100), 2)',
-        'final_price',
-      )
-      .addSelect('COALESCE(ROUND(AVG(r.rating)::numeric, 1), 0)', 'rating_avg')
-      .addSelect('COUNT(r.id)::int', 'rating_count')
-      .groupBy('p.id')
-      .addGroupBy('b.name')
-      .addGroupBy('img.image_url')
-      .orderBy('p.created_at', 'DESC')
+  async findAllCards(query: ProductCardFilterQueryDto) {
+    return this.findCardsByFilters(query);
+  }
+
+  async findCardsByFilters(query: ProductCardFilterQueryDto): Promise<{
+    items: ProductCardDto[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      total_pages: number;
+    };
+  }> {
+    const cardsQuery = this.buildCardBaseQuery();
+    this.applyCardFilters(cardsQuery, query);
+    this.applyCardSort(cardsQuery, query);
+
+    const offset = (query.page - 1) * query.limit;
+    const rows = await cardsQuery
+      .offset(offset)
+      .limit(query.limit)
       .getRawMany<Record<string, string | number | null>>();
 
-    return rows.map((row) => this.mapRawToProductCard(row));
+    const totalRaw = await this.createFilteredProductsQuery(query)
+      .select('COUNT(DISTINCT p.id)::int', 'total')
+      .getRawOne<{ total: string | number | null }>();
+    const total = this.toNumber(totalRaw?.total);
+
+    return {
+      items: rows.map((row) => this.mapRawToProductCard(row)),
+      pagination: {
+        page: query.page,
+        limit: query.limit,
+        total,
+        total_pages: total === 0 ? 0 : Math.ceil(total / query.limit),
+      },
+    };
   }
 
   async getTrendingCards(): Promise<ProductCardDto[]> {
-    const rows = await this.productRepository
-      .createQueryBuilder('p')
-      .leftJoin('p.brand', 'b')
-      .leftJoin(
-        'p.images',
-        'img',
-        'img.is_primary = :isPrimary',
-        { isPrimary: true },
-      )
-      .leftJoin('p.reviews', 'r')
-      .where('p.is_active = :active', { active: true })
-      .select('p.id', 'id')
-      .addSelect('p.slug', 'slug')
-      .addSelect('p.name', 'name')
-      .addSelect("COALESCE(b.name, '')", 'brand_name')
-      .addSelect('img.image_url', 'thumbnail_url')
-      .addSelect('p.base_price', 'base_price')
-      .addSelect('p.discount_percent', 'discount_percent')
-      .addSelect(
-        'ROUND((p.base_price::numeric * (100 - p.discount_percent) / 100), 2)',
-        'final_price',
-      )
-      .addSelect('COALESCE(ROUND(AVG(r.rating)::numeric, 1), 0)', 'rating_avg')
-      .addSelect('COUNT(r.id)::int', 'rating_count')
-      .groupBy('p.id')
-      .addGroupBy('b.name')
-      .addGroupBy('img.image_url')
+    const rows = await this.buildCardBaseQuery()
       .orderBy('rating_avg', 'DESC')
+      .addOrderBy('p.created_at', 'DESC')
       .limit(5)
       .getRawMany<Record<string, string | number | null>>();
 
@@ -104,12 +93,9 @@ export class ProductService {
     const keyword = query.q.trim().toLowerCase();
     const rows = await this.productRepository
       .createQueryBuilder('p')
-      .leftJoin(
-        'p.images',
-        'img',
-        'img.is_primary = :isPrimary',
-        { isPrimary: true },
-      )
+      .leftJoin('p.images', 'img', 'img.is_primary = :isPrimary', {
+        isPrimary: true,
+      })
       .leftJoin('p.reviews', 'r')
       .where('p.is_active = :active', { active: true })
       .andWhere('LOWER(p.name) LIKE :prefix', { prefix: `${keyword}%` })
@@ -132,6 +118,222 @@ export class ProductService {
       .getRawMany<Record<string, string | number | null>>();
 
     return rows.map((row) => this.mapRawToSuggestion(row));
+  }
+
+  async getFilterFacets(
+    query: ProductFiltersQueryDto,
+  ): Promise<ProductFilterFacetsDto> {
+    const scopeQuery = this.createFilteredProductsQuery(query);
+
+    const totalRaw = await scopeQuery
+      .clone()
+      .select('COUNT(DISTINCT p.id)::int', 'total')
+      .getRawOne<{ total: string | number | null }>();
+    const totalMatching = this.toNumber(totalRaw?.total);
+
+    const priceRaw = await scopeQuery
+      .clone()
+      .select(`COALESCE(MIN(${FINAL_PRICE_SQL}), 0)`, 'min')
+      .addSelect(`COALESCE(MAX(${FINAL_PRICE_SQL}), 0)`, 'max')
+      .getRawOne<{
+        min: string | number | null;
+        max: string | number | null;
+      }>();
+
+    const brandRows = await scopeQuery
+      .clone()
+      .leftJoin('p.brand', 'b')
+      .andWhere('p.brand_id IS NOT NULL')
+      .select('b.id', 'id')
+      .addSelect("COALESCE(b.name, '')", 'name')
+      .addSelect('COUNT(DISTINCT p.id)::int', 'count')
+      .groupBy('b.id')
+      .addGroupBy('b.name')
+      .orderBy('count', 'DESC')
+      .addOrderBy('b.name', 'ASC')
+      .getRawMany<Record<string, string | number | null>>();
+
+    const colorRows = await scopeQuery
+      .clone()
+      .innerJoin('p.variants', 'pv')
+      .andWhere("COALESCE(TRIM(pv.color), '') <> ''")
+      .select('LOWER(pv.color)', 'value')
+      .addSelect('COUNT(DISTINCT p.id)::int', 'count')
+      .groupBy('LOWER(pv.color)')
+      .orderBy('count', 'DESC')
+      .addOrderBy('LOWER(pv.color)', 'ASC')
+      .getRawMany<Record<string, string | number | null>>();
+
+    const discountRaw = await scopeQuery
+      .clone()
+      .select(
+        'SUM(CASE WHEN p.discount_percent BETWEEN 0 AND 9 THEN 1 ELSE 0 END)::int',
+        'bucket_0_10',
+      )
+      .addSelect(
+        'SUM(CASE WHEN p.discount_percent BETWEEN 10 AND 19 THEN 1 ELSE 0 END)::int',
+        'bucket_10_20',
+      )
+      .addSelect(
+        'SUM(CASE WHEN p.discount_percent BETWEEN 20 AND 29 THEN 1 ELSE 0 END)::int',
+        'bucket_20_30',
+      )
+      .addSelect(
+        'SUM(CASE WHEN p.discount_percent BETWEEN 30 AND 49 THEN 1 ELSE 0 END)::int',
+        'bucket_30_50',
+      )
+      .addSelect(
+        'SUM(CASE WHEN p.discount_percent >= 50 THEN 1 ELSE 0 END)::int',
+        'bucket_50_plus',
+      )
+      .getRawOne<Record<string, string | number | null>>();
+
+    const discountBuckets: DiscountBucketFacetDto[] = [
+      {
+        key: '0-10',
+        min: 0,
+        max: 10,
+        count: this.toNumber(discountRaw?.bucket_0_10),
+      },
+      {
+        key: '10-20',
+        min: 10,
+        max: 20,
+        count: this.toNumber(discountRaw?.bucket_10_20),
+      },
+      {
+        key: '20-30',
+        min: 20,
+        max: 30,
+        count: this.toNumber(discountRaw?.bucket_20_30),
+      },
+      {
+        key: '30-50',
+        min: 30,
+        max: 50,
+        count: this.toNumber(discountRaw?.bucket_30_50),
+      },
+      {
+        key: '50+',
+        min: 50,
+        max: null,
+        count: this.toNumber(discountRaw?.bucket_50_plus),
+      },
+    ];
+
+    return {
+      price_range: {
+        min: this.toNumber(priceRaw?.min),
+        max: this.toNumber(priceRaw?.max),
+      },
+      brands: brandRows.map((row) => ({
+        id: this.toNumber(row.id),
+        name: String(row.name ?? ''),
+        count: this.toNumber(row.count),
+      })),
+      colors: colorRows.map((row) => ({
+        value: String(row.value ?? ''),
+        count: this.toNumber(row.count),
+      })),
+      discount_buckets: discountBuckets,
+      total_matching: totalMatching,
+    };
+  }
+
+  private buildCardBaseQuery(): SelectQueryBuilder<Product> {
+    return this.productRepository
+      .createQueryBuilder('p')
+      .leftJoin('p.brand', 'b')
+      .leftJoin('p.images', 'img', 'img.is_primary = :isPrimary', {
+        isPrimary: true,
+      })
+      .leftJoin('p.reviews', 'r')
+      .where('p.is_active = :active', { active: true })
+      .select('p.id', 'id')
+      .addSelect('p.slug', 'slug')
+      .addSelect('p.name', 'name')
+      .addSelect("COALESCE(b.name, '')", 'brand_name')
+      .addSelect('img.image_url', 'thumbnail_url')
+      .addSelect('p.base_price', 'base_price')
+      .addSelect('p.discount_percent', 'discount_percent')
+      .addSelect(`ROUND(${FINAL_PRICE_SQL}, 2)`, 'final_price')
+      .addSelect('COALESCE(ROUND(AVG(r.rating)::numeric, 1), 0)', 'rating_avg')
+      .addSelect('COUNT(DISTINCT r.id)::int', 'rating_count')
+      .groupBy('p.id')
+      .addGroupBy('b.name')
+      .addGroupBy('img.image_url');
+  }
+
+  private createFilteredProductsQuery(
+    query: ProductFiltersQueryDto | ProductCardFilterQueryDto,
+  ): SelectQueryBuilder<Product> {
+    const qb = this.productRepository
+      .createQueryBuilder('p')
+      .where('p.is_active = :active', { active: true });
+    this.applyCardFilters(qb, query);
+    return qb;
+  }
+
+  private applyCardFilters(
+    qb: SelectQueryBuilder<Product>,
+    query: ProductFiltersQueryDto | ProductCardFilterQueryDto,
+  ): void {
+    if (query.minPrice !== undefined) {
+      qb.andWhere(`${FINAL_PRICE_SQL} >= :minPrice`, {
+        minPrice: query.minPrice,
+      });
+    }
+
+    if (query.maxPrice !== undefined) {
+      qb.andWhere(`${FINAL_PRICE_SQL} <= :maxPrice`, {
+        maxPrice: query.maxPrice,
+      });
+    }
+
+    if (query.minDiscount !== undefined) {
+      qb.andWhere('p.discount_percent >= :minDiscount', {
+        minDiscount: query.minDiscount,
+      });
+    }
+
+    if (query.brandIds && query.brandIds.length > 0) {
+      qb.andWhere('p.brand_id IN (:...brandIds)', { brandIds: query.brandIds });
+    }
+
+    const normalizedColors = (query.colors ?? [])
+      .map((color) => color.trim().toLowerCase())
+      .filter((color) => color.length > 0);
+
+    if (normalizedColors.length > 0) {
+      qb.andWhere(
+        `EXISTS (
+          SELECT 1
+          FROM product_variants pv
+          WHERE pv.product_id = p.id
+            AND LOWER(pv.color) IN (:...colors)
+        )`,
+        { colors: normalizedColors },
+      );
+    }
+  }
+
+  private applyCardSort(
+    qb: SelectQueryBuilder<Product>,
+    query: ProductCardFilterQueryDto,
+  ): void {
+    const sortOrder = query.sortOrder ?? SortOrder.DESC;
+
+    if (query.sortBy === ProductCardSortBy.FINAL_PRICE) {
+      qb.orderBy(FINAL_PRICE_SQL, sortOrder);
+    } else if (query.sortBy === ProductCardSortBy.RATING_AVG) {
+      qb.orderBy('rating_avg', sortOrder);
+    } else {
+      qb.orderBy('p.created_at', sortOrder);
+    }
+
+    if (query.sortBy !== ProductCardSortBy.CREATED_AT) {
+      qb.addOrderBy('p.created_at', 'DESC');
+    }
   }
 
   private mapRawToSuggestion(
@@ -170,7 +372,11 @@ export class ProductService {
   }
 
   private toNumber(v: string | number | null | undefined): number {
-    return v === null || v === undefined ? 0 : typeof v === 'number' ? v : Number(v);
+    return v === null || v === undefined
+      ? 0
+      : typeof v === 'number'
+        ? v
+        : Number(v);
   }
 
   async findOne(id: number): Promise<Product> {

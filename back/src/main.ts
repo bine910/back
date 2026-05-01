@@ -6,13 +6,13 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(new ValidationPipe(
-    {
+  app.useGlobalPipes(
+    new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
-      transform: true
-    }
-  ));
+      transform: true,
+    }),
+  );
 
   const config = new DocumentBuilder()
     .setTitle('Globex API') // Tên dự án
