@@ -5,6 +5,7 @@ import { Product } from '../../entities/product.entity';
 import { ProductCardDto } from './dto/product-card.dto';
 import { ProductSuggestionDto } from './dto/product-suggestion.dto';
 import { ProductSuggestionQueryDto } from './dto/product-suggestion-query.dto';
+import { ProductRelationType } from '../../common/enums';
 import {
   ProductCardFilterQueryDto,
   ProductCardSortBy,
@@ -15,6 +16,7 @@ import {
   ProductFilterFacetsDto,
 } from './dto/product-filter-facets.dto';
 import { ProductFiltersQueryDto } from './dto/product-filters-query.dto';
+import { ProductOpenPageResponseDto } from './dto/product-open-page-response.dto';
 
 const FINAL_PRICE_SQL =
   '(p.base_price::numeric * (100 - p.discount_percent) / 100)';
@@ -240,6 +242,115 @@ export class ProductService {
     };
   }
 
+  async getOpenPageById(id: number): Promise<ProductOpenPageResponseDto> {
+    const product = await this.productRepository.findOne({
+      where: { id, is_active: true },
+      relations: [
+        'brand',
+        'images',
+        'variants',
+        'reviews',
+        'reviews.user',
+        'reviews.images',
+      ],
+    });
+
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+
+    const sortedImages = [...(product.images ?? [])].sort(
+      (a, b) => a.display_order - b.display_order,
+    );
+    const reviews = [...(product.reviews ?? [])].sort(
+      (a, b) => b.created_at.getTime() - a.created_at.getTime(),
+    );
+    const ratingCount = reviews.length;
+    const ratingAvg =
+      ratingCount === 0
+        ? 0
+        : Number(
+            (
+              reviews.reduce((sum, review) => sum + review.rating, 0) /
+              ratingCount
+            ).toFixed(1),
+          );
+
+    const relatedSimilar = await this.getRelatedCardsByType(
+      product.id,
+      ProductRelationType.SIMILAR,
+    );
+    const relatedAlsoLike = await this.getRelatedCardsByType(
+      product.id,
+      ProductRelationType.CUSTOMER_ALSO_LIKE,
+    );
+
+    return {
+      product: {
+        id: product.id,
+        slug: product.slug,
+        name: product.name,
+        description: product.description ?? '',
+        brand_name: product.brand?.name ?? '',
+        base_price: this.toNumber(product.base_price),
+        final_price: this.calculateFinalPrice(
+          this.toNumber(product.base_price),
+          this.toNumber(product.discount_percent),
+        ),
+        discount_percent: this.toNumber(product.discount_percent),
+        rating_avg: ratingAvg,
+        rating_count: ratingCount,
+      },
+      media_and_options: {
+        images: sortedImages.map((image) => ({
+          url: image.image_url,
+          color_code: image.color_code ?? null,
+          is_primary: image.is_primary,
+          display_order: image.display_order,
+        })),
+        available_sizes: this.sortSizes(
+          Array.from(
+            new Set(
+              (product.variants ?? [])
+                .map((variant) => variant.size?.trim())
+                .filter((size): size is string => Boolean(size)),
+            ),
+          ),
+        ),
+        available_colors: Array.from(
+          new Set(
+            (product.variants ?? [])
+              .map((variant) => variant.color?.trim())
+              .filter((color): color is string => Boolean(color)),
+          ),
+        ).sort((a, b) => a.localeCompare(b)),
+      },
+      tabs: {
+        product_details: this.normalizeRecord(product.extra?.product_details),
+        specifications: this.normalizeRecord(product.extra?.specifications),
+      },
+      related_sections: {
+        similar_products: relatedSimilar,
+        customer_also_like: relatedAlsoLike,
+      },
+      reviews: {
+        summary: {
+          rating_avg: ratingAvg,
+          rating_count: ratingCount,
+        },
+        items: reviews.map((review) => ({
+          id: review.id,
+          user_name: review.user?.full_name ?? '',
+          rating: review.rating,
+          content: review.content ?? '',
+          is_verified_purchase: review.is_verified_purchase,
+          created_at: review.created_at.toISOString(),
+          images: (review.images ?? []).map((image) => image.image_url),
+        })),
+      },
+    };
+  }
+
   private buildCardBaseQuery(): SelectQueryBuilder<Product> {
     return this.productRepository
       .createQueryBuilder('p')
@@ -262,6 +373,46 @@ export class ProductService {
       .groupBy('p.id')
       .addGroupBy('b.name')
       .addGroupBy('img.image_url');
+  }
+
+  private async getRelatedCardsByType(
+    productId: number,
+    relationType: ProductRelationType,
+  ): Promise<ProductCardDto[]> {
+    const rows = await this.productRepository
+      .createQueryBuilder('p')
+      .innerJoin(
+        'product_relations',
+        'pr',
+        'pr.related_product_id = p.id AND pr.product_id = :productId AND pr.relation_type = :relationType',
+        { productId, relationType },
+      )
+      .leftJoin('p.brand', 'b')
+      .leftJoin('p.images', 'img', 'img.is_primary = :isPrimary', {
+        isPrimary: true,
+      })
+      .leftJoin('p.reviews', 'r')
+      .where('p.is_active = :active', { active: true })
+      .select('p.id', 'id')
+      .addSelect('p.slug', 'slug')
+      .addSelect('p.name', 'name')
+      .addSelect("COALESCE(b.name, '')", 'brand_name')
+      .addSelect('img.image_url', 'thumbnail_url')
+      .addSelect('p.base_price', 'base_price')
+      .addSelect('p.discount_percent', 'discount_percent')
+      .addSelect(`ROUND(${FINAL_PRICE_SQL}, 2)`, 'final_price')
+      .addSelect('COALESCE(ROUND(AVG(r.rating)::numeric, 1), 0)', 'rating_avg')
+      .addSelect('COUNT(DISTINCT r.id)::int', 'rating_count')
+      .addSelect('COALESCE(pr.sort_order, 0)', 'sort_order')
+      .groupBy('p.id')
+      .addGroupBy('b.name')
+      .addGroupBy('img.image_url')
+      .addGroupBy('pr.sort_order')
+      .orderBy('sort_order', 'ASC')
+      .addOrderBy('p.created_at', 'DESC')
+      .getRawMany<Record<string, string | number | null>>();
+
+    return rows.map((row) => this.mapRawToProductCard(row));
   }
 
   private createFilteredProductsQuery(
@@ -377,6 +528,60 @@ export class ProductService {
       : typeof v === 'number'
         ? v
         : Number(v);
+  }
+
+  private calculateFinalPrice(
+    basePrice: number,
+    discountPercent: number,
+  ): number {
+    return Number(((basePrice * (100 - discountPercent)) / 100).toFixed(2));
+  }
+
+  private normalizeRecord(value: unknown): Record<string, string> {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      return {};
+    }
+
+    const entries = Object.entries(value as Record<string, unknown>).map(
+      ([key, rawValue]) => {
+        if (typeof rawValue === 'string') {
+          return [key, rawValue] as const;
+        }
+        if (typeof rawValue === 'number' || typeof rawValue === 'boolean') {
+          return [key, `${rawValue}`] as const;
+        }
+        if (rawValue instanceof Date) {
+          return [key, rawValue.toISOString()] as const;
+        }
+        return [key, ''] as const;
+      },
+    );
+
+    return Object.fromEntries(entries);
+  }
+
+  private sortSizes(sizes: string[]): string[] {
+    const rank: Record<string, number> = {
+      XXS: 0,
+      XS: 1,
+      S: 2,
+      M: 3,
+      L: 4,
+      XL: 5,
+      XXL: 6,
+      XXXL: 7,
+    };
+
+    return [...sizes].sort((a, b) => {
+      const normalizedA = a.toUpperCase();
+      const normalizedB = b.toUpperCase();
+      const rankA = rank[normalizedA] ?? Number.MAX_SAFE_INTEGER;
+      const rankB = rank[normalizedB] ?? Number.MAX_SAFE_INTEGER;
+      if (rankA !== rankB) {
+        return rankA - rankB;
+      }
+      return normalizedA.localeCompare(normalizedB);
+    });
   }
 
   async findOne(id: number): Promise<Product> {

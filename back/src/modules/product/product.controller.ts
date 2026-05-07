@@ -21,6 +21,7 @@ import { ProductCardFilterQueryDto } from './dto/product-card-filter-query.dto';
 import { ProductFiltersQueryDto } from './dto/product-filters-query.dto';
 import { ProductCardListResponseDto } from './dto/product-card-list-response.dto';
 import { ProductFilterFacetsDto } from './dto/product-filter-facets.dto';
+import { ProductOpenPageResponseDto } from './dto/product-open-page-response.dto';
 
 @ApiTags('Sản phẩm (Products)')
 @Controller('products')
@@ -95,6 +96,13 @@ export class ProductController {
   @ApiOperation({ summary: 'Lấy gợi ý sản phẩm cho thanh tìm kiếm' })
   getSuggestions(@Query() query: ProductSuggestionQueryDto) {
     return this.productService.searchSuggestions(query);
+  }
+
+  @Get(':id/open-page')
+  @ApiOperation({ summary: 'Lấy dữ liệu ProductOpenPage theo ID sản phẩm' })
+  @ApiOkResponse({ type: ProductOpenPageResponseDto })
+  getOpenPage(@Param('id') id: string) {
+    return this.productService.getOpenPageById(+id);
   }
 
   @Get(':id')
