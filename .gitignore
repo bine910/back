@@ -2,3 +2,5 @@
 .env
 scripts/verify-backend-last.log
 .specstory/
+.claude/
+.vscode/

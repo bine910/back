@@ -12,6 +12,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProductModule } from './modules/product/product.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { WishlistModule } from './modules/wishlist/wishlist.module';
+import { CartModule } from './modules/cart/cart.module';
 
 @Module({
   imports: [
@@ -37,6 +39,8 @@ import { AuthModule } from './modules/auth/auth.module';
     UserModule,
     ProductModule,
     AuthModule,
+    WishlistModule,
+    CartModule,
   ],
   controllers: [AppController],
   providers: [AppService],

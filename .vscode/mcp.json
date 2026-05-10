@@ -1,0 +1,8 @@
+{
+	"servers": {
+    "Dang_le-frontend-MCP": {
+        "type": "sse",
+        "url": "https://github.com/dangle10/react"
+    }
+}
+}
