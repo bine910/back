@@ -25,9 +25,12 @@ ALTER SEQUENCE product_reviews_id_seq RESTART WITH 1;
 
 -- Cần 1 user để gắn vào các lượt review
 -- Giá trị phải khớp users_role_enum trong DB: 'user' | 'admin' (UserRole.CUSTOMER = 'user' trong app)
-INSERT INTO users (id, email, password_hash, full_name, role) VALUES 
-(1, 'customer1@example.com', 'hashed_pw', 'Nguyễn Văn A', 'user'),
-(2, 'customer2@example.com', 'hashed_pw', 'Trần Thị B', 'user');
+-- password: 12345678
+INSERT INTO users (id, email, password_hash, full_name, role) VALUES
+(1, 'customer1@example.com', '$2b$10$nfHT3Xp1zKxXK3oHkHo4/eMYDJam6g3jcHGtYUuBR0eT.zbJGUBFy', 'Nguyễn Văn A', 'user'),
+(2, 'customer2@example.com', '$2b$10$nfHT3Xp1zKxXK3oHkHo4/eMYDJam6g3jcHGtYUuBR0eT.zbJGUBFy', 'Trần Thị B', 'user');
+
+SELECT setval('users_id_seq', (SELECT MAX(id) FROM users));
 
 -- Categories
 INSERT INTO categories (id, name, slug) VALUES 
