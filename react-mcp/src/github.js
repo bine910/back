@@ -3,7 +3,7 @@ const BASE = "https://api.github.com/repos/dangle10/react";
 /**
  * @returns {Record<string, string>}
  */
-export function getGithubHeaders() {
+export function getGithubHeaders() {//tạo HTTP headers cho mọi request gửi lên GitHub
   const headers = {
     Accept: "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28",
@@ -35,7 +35,7 @@ export async function githubGet(path) {
   return res.json();
 }
 
-export function decodeBase64(encoded) {
+export function decodeBase64(encoded) {//Giải mã chuỗi base64 thành chuỗi UTF-8
   return Buffer.from(encoded.replace(/\n/g, ""), "base64").toString("utf8");
 }
 
