@@ -28,11 +28,13 @@ export class ProductService {
     private readonly productRepository: Repository<Product>,
   ) {}
 
+  // Tạo sản phẩm mới
   async create(data: Partial<Product>): Promise<Product> {
     const product = this.productRepository.create(data);
     return await this.productRepository.save(product);
   }
 
+  // Lấy tất cả sản phẩm kèm full relations (dùng cho admin)
   async findAll(): Promise<Product[]> {
     return await this.productRepository.find({
       relations: ['images', 'variants', 'category', 'brand'],
@@ -40,10 +42,12 @@ export class ProductService {
     });
   }
 
+  // Alias → findCardsByFilters
   async findAllCards(query: ProductCardFilterQueryDto) {
     return this.findCardsByFilters(query);
   }
 
+  // Lấy danh sách card có filter, sort, phân trang → trả { items, pagination }
   async findCardsByFilters(query: ProductCardFilterQueryDto): Promise<{
     items: ProductCardDto[];
     pagination: {
@@ -79,6 +83,7 @@ export class ProductService {
     };
   }
 
+  // Top 5 sản phẩm trending, sort by rating_avg DESC
   async getTrendingCards(): Promise<ProductCardDto[]> {
     const rows = await this.buildCardBaseQuery()
       .orderBy('rating_avg', 'DESC')
@@ -89,6 +94,7 @@ export class ProductService {
     return rows.map((row) => this.mapRawToProductCard(row));
   }
 
+  // Gợi ý tìm kiếm: prefix match theo tên, trả danh sách tối giản
   async searchSuggestions(
     query: ProductSuggestionQueryDto,
   ): Promise<ProductSuggestionDto[]> {
@@ -122,6 +128,7 @@ export class ProductService {
     return rows.map((row) => this.mapRawToSuggestion(row));
   }
 
+  // Tính facets cho sidebar filter: price range, brands, colors, discount buckets
   async getFilterFacets(
     query: ProductFiltersQueryDto,
   ): Promise<ProductFilterFacetsDto> {
@@ -242,6 +249,7 @@ export class ProductService {
     };
   }
 
+  // Toàn bộ dữ liệu trang chi tiết: product + media/options + tabs + related + reviews
   async getOpenPageById(id: number): Promise<ProductOpenPageResponseDto> {
     const product = await this.productRepository.findOne({
       where: { id, is_active: true },
@@ -351,6 +359,7 @@ export class ProductService {
     };
   }
 
+  // Base SELECT card fields với join brand / primary-image / reviews, dùng chung cho mọi card query
   private buildCardBaseQuery(): SelectQueryBuilder<Product> {
     return this.productRepository
       .createQueryBuilder('p')
@@ -375,6 +384,7 @@ export class ProductService {
       .addGroupBy('img.image_url');
   }
 
+  // Lấy card sản phẩm liên quan theo relation_type (SIMILAR hoặc CUSTOMER_ALSO_LIKE)
   private async getRelatedCardsByType(
     productId: number,
     relationType: ProductRelationType,
@@ -415,6 +425,7 @@ export class ProductService {
     return rows.map((row) => this.mapRawToProductCard(row));
   }
 
+  // Query cơ sở đã áp filter, dùng chung cho findCardsByFilters và getFilterFacets
   private createFilteredProductsQuery(
     query: ProductFiltersQueryDto | ProductCardFilterQueryDto,
   ): SelectQueryBuilder<Product> {
@@ -425,6 +436,7 @@ export class ProductService {
     return qb;
   }
 
+  // Thêm WHERE clauses (giá, brand, màu, discount) vào query builder
   private applyCardFilters(
     qb: SelectQueryBuilder<Product>,
     query: ProductFiltersQueryDto | ProductCardFilterQueryDto,
@@ -468,6 +480,7 @@ export class ProductService {
     }
   }
 
+  // Thêm ORDER BY theo sortBy / sortOrder, kèm tiebreaker created_at DESC
   private applyCardSort(
     qb: SelectQueryBuilder<Product>,
     query: ProductCardFilterQueryDto,
@@ -487,6 +500,7 @@ export class ProductService {
     }
   }
 
+  // Map raw DB row → ProductSuggestionDto
   private mapRawToSuggestion(
     row: Record<string, string | number | null>,
   ): ProductSuggestionDto {
@@ -501,6 +515,7 @@ export class ProductService {
     };
   }
 
+  // Map raw DB row → ProductCardDto (rating_count bỏ qua nếu = 0)
   private mapRawToProductCard(
     row: Record<string, string | number | null>,
   ): ProductCardDto {
@@ -522,6 +537,7 @@ export class ProductService {
     return dto;
   }
 
+  // Ép kiểu an toàn: string | number | null | undefined → number (null/undefined → 0)
   private toNumber(v: string | number | null | undefined): number {
     return v === null || v === undefined
       ? 0
@@ -530,6 +546,7 @@ export class ProductService {
         : Number(v);
   }
 
+  // Tính final_price = base_price * (100 - discount%) / 100, làm tròn 2 chữ số
   private calculateFinalPrice(
     basePrice: number,
     discountPercent: number,
@@ -537,6 +554,7 @@ export class ProductService {
     return Number(((basePrice * (100 - discountPercent)) / 100).toFixed(2));
   }
 
+  // Chuẩn hóa jsonb object → Record<string, string> (dùng cho extra.product_details / specifications)
   private normalizeRecord(value: unknown): Record<string, string> {
     if (!value || typeof value !== 'object' || Array.isArray(value)) {
       return {};
@@ -560,6 +578,7 @@ export class ProductService {
     return Object.fromEntries(entries);
   }
 
+  // Sort size theo thứ tự chuẩn: XXS → XS → S → M → L → XL → XXL → XXXL
   private sortSizes(sizes: string[]): string[] {
     const rank: Record<string, number> = {
       XXS: 0,
@@ -584,6 +603,7 @@ export class ProductService {
     });
   }
 
+  // Lấy sản phẩm theo ID kèm full relations, throw 404 nếu không tìm thấy
   async findOne(id: number): Promise<Product> {
     const product = await this.productRepository.findOne({
       where: { id },
@@ -595,12 +615,14 @@ export class ProductService {
     return product;
   }
 
+  // Cập nhật sản phẩm theo ID
   async update(id: number, data: Partial<Product>): Promise<Product> {
     const product = await this.findOne(id);
     this.productRepository.merge(product, data);
     return await this.productRepository.save(product);
   }
 
+  // Xóa sản phẩm theo ID
   async remove(id: number): Promise<void> {
     const product = await this.findOne(id);
     await this.productRepository.remove(product);
