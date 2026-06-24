@@ -9,7 +9,7 @@ export class ProductSuggestionQueryDto {
   @Transform(({ value }) => String(value ?? '').trim())
   q!: string;
 
-  @ApiPropertyOptional({ example: 8, minimum: 1, maximum: 20, default: 8 })
+  @ApiPropertyOptional({ type: Number, example: 8, minimum: 1, maximum: 20, default: 8 })
   @Transform(({ value }) => {
     if (value === undefined || value === null || value === '') {
       return 8;

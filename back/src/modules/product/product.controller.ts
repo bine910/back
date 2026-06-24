@@ -17,6 +17,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
+import { ProductSuggestionDto } from './dto/product-suggestion.dto';
 import { ProductCardFilterQueryDto } from './dto/product-card-filter-query.dto';
 import { ProductFiltersQueryDto } from './dto/product-filters-query.dto';
 import { ProductCardListResponseDto } from './dto/product-card-list-response.dto';
@@ -94,6 +95,7 @@ export class ProductController {
 
   @Get('suggestions')
   @ApiOperation({ summary: 'Lấy gợi ý sản phẩm cho thanh tìm kiếm' })
+  @ApiOkResponse({ type: [ProductSuggestionDto] })
   getSuggestions(@Query() query: ProductSuggestionQueryDto) {
     return this.productService.searchSuggestions(query);
   }
