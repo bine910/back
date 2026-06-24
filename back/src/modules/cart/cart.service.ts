@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CartItem } from '../../entities/cart-item.entity';
@@ -82,6 +82,16 @@ export class CartService {
     const total_amount = items.reduce((sum, item) => sum + item.subtotal, 0);
 
     return { items, total_amount };
+  }
+
+  async removeFromCart(userId: number, itemId: number): Promise<void> {
+    const item = await this.cartItemRepository.findOneBy({ id: itemId });
+
+    if (!item || item.user_id !== userId) {
+      throw new NotFoundException(`Cart item với ID ${itemId} không tồn tại`);
+    }
+
+    await this.cartItemRepository.remove(item);
   }
 
   private mapToCartItemDto(row: Record<string, any>): CartItemDto {

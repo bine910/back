@@ -2,6 +2,9 @@ import {
   Controller,
   Post,
   Get,
+  Delete,
+  Param,
+  ParseIntPipe,
   Body,
   UseGuards,
   Request,
@@ -15,6 +18,7 @@ import {
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiNoContentResponse,
 } from '@nestjs/swagger';
 import { CartResponseDto } from './dto/cart-response.dto';
 import { CartService } from './cart.service';
@@ -33,6 +37,18 @@ export class CartController {
   @ApiOkResponse({ type: CartResponseDto })
   getCart(@Request() req: any) {
     return this.cartService.getCart(req.user.id);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Xóa sản phẩm khỏi giỏ hàng theo cart item ID' })
+  @ApiNoContentResponse({ description: 'Xóa thành công' })
+  @ApiNotFoundResponse({ description: 'Cart item không tồn tại' })
+  removeFromCart(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.cartService.removeFromCart(req.user.id, id);
   }
 
   @Post()
