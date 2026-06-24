@@ -19,7 +19,7 @@ import {
 } from '@nestjs/swagger';
 import { ProductCardDto } from '../product/dto/product-card.dto';
 import { WishlistService } from './wishlist.service';
-import { AddToWishlistDto } from './dto/add-to-wishlist.dto';
+import { WishlistDto } from './dto/add-to-wishlist.dto';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 
 @ApiTags('Danh sách yêu thích (Wishlist)')
@@ -35,8 +35,17 @@ export class WishlistController {
   @ApiCreatedResponse({ description: 'Thêm vào wishlist thành công' })
   @ApiConflictResponse({ description: 'Sản phẩm đã có trong wishlist' })
   @ApiNotFoundResponse({ description: 'Sản phẩm không tồn tại' })
-  addToWishlist(@Request() req: any, @Body() dto: AddToWishlistDto) {
+  addToWishlist(@Request() req: any, @Body() dto: WishlistDto) {
     return this.wishlistService.addToWishlist(req.user.id, dto);
+  }
+
+  @Post('remove')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Xóa sản phẩm khỏi wishlist của người dùng' })
+  @ApiOkResponse({ description: 'Xóa khỏi wishlist thành công' })
+  @ApiNotFoundResponse({ description: 'Sản phẩm không tồn tại trong wishlist' })
+  removeFromWishlist(@Request() req: any, @Body() dto: WishlistDto) {
+    return this.wishlistService.removeFromWishlist(req.user.id, dto);
   }
 
   @Get()
@@ -46,5 +55,5 @@ export class WishlistController {
   getWishlist(@Request() req: any) {
     return this.wishlistService.getWishlist(req.user.id);
   }
-  
+
 }
