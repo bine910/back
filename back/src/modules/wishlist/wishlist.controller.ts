@@ -46,4 +46,5 @@ export class WishlistController {
   getWishlist(@Request() req: any) {
     return this.wishlistService.getWishlist(req.user.id);
   }
+  
 }

@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Wishlist } from '../../entities/wishlist.entity';
 import { Product } from '../../entities/product.entity';
-import { AddToWishlistDto } from './dto/add-to-wishlist.dto';
+import { WishlistDto } from './dto/add-to-wishlist.dto';
 import { ProductCardDto } from '../product/dto/product-card.dto';
 
 const FINAL_PRICE_SQL =
@@ -22,7 +22,7 @@ export class WishlistService {
     private readonly productRepository: Repository<Product>,
   ) {}
 
-  async addToWishlist(userId: number, dto: AddToWishlistDto): Promise<Wishlist> {
+  async addToWishlist(userId: number, dto: WishlistDto): Promise<Wishlist> {
     const product = await this.productRepository.findOneBy({ id: dto.product_id });
     if (!product) {
       throw new NotFoundException(`Sản phẩm với ID ${dto.product_id} không tồn tại`);
@@ -41,6 +41,16 @@ export class WishlistService {
       product_id: dto.product_id,
     });
     return this.wishlistRepository.save(item);
+  }
+async removeFromWishlist(userId: number, dto: WishlistDto): Promise<void> {  
+    const existing = await this.wishlistRepository.findOneBy({
+      user_id: userId,
+      product_id: dto.product_id,
+    });
+    if (!existing) {
+      throw new NotFoundException('Sản phẩm không tồn tại trong wishlist');
+    }
+    await this.wishlistRepository.remove(existing);
   }
 
   async getWishlist(userId: number): Promise<ProductCardDto[]> {
