@@ -13,7 +13,11 @@ async function bootstrap() {
       transform: true,
     }),
   );
-
+  app.enableCors({
+    origin: '*', // Cho phép tất cả các nguồn (hoặc điền cụ thể url của FE vào đây, ví dụ: 'http://localhost:5173')
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
   const config = new DocumentBuilder()
     .setTitle('Globex API') // Tên dự án
     .setDescription('Tài liệu mô tả các API của hệ thống ') // Mô tả

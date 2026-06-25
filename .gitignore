@@ -2,5 +2,9 @@
 .env
 scripts/verify-backend-last.log
 .specstory/
-.claude/
 .vscode/
+.API-LOGIC.md
+
+# Claude Code config (contains secrets)
+.claude/mcp.json
+.claude/settings.json

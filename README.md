@@ -25,7 +25,10 @@ internship-project-bine910 created by GitHub Classroom
 **Bài toán / nội dung áp dụng cụ thể:**
 Xây dựng hệ thống Backend (RESTful API) cho website thương mại điện tử kinh doanh thời trang "Globex". Hệ thống cung cấp các API quản lý người dùng, sản phẩm, bộ lọc tìm kiếm, giỏ hàng, và đơn hàng. Áp dụng công nghệ Containerization (Docker) để triển khai và quy trình "vibe-coding" bằng Google AntiGravity để tối ưu hóa tốc độ và chất lượng mã nguồn.
 
-Link GitHub repository (nếu có): https://github.com/bine910/ttcs 
+Link GitHub repository (nếu có):
+- **Back-end:** https://github.com/bine910/back
+
+
 Làm việc nhóm (nếu có):
 Lê Hải Đăng - B23DCVT072 - front-end
 ---
@@ -102,39 +105,52 @@ Mục tiêu: Kết nối Cursor (AI Agent) với các công cụ quản lý mã 
 
 ---
 
-### Tuần 7 – Bắt đầu làm Product
-Mục tiêu: Áp dụng kiến thức để code nghiệp vụ lõi.
+### Tuần 7 – Cấu hình AI-Assisted Development với Claude Code & MCP
+Mục tiêu: Thiết lập bộ công cụ AI chuyên biệt để đọc code FE và đảm bảo backend code đúng theo yêu cầu frontend trước khi bắt đầu làm Product.
 
 | Nhiệm vụ | Trạng thái | Kết quả đầu ra | Ghi chú |
 |---------|-----------|---------------|--------|
-| Thiết kế CSDL hoàn chỉnh (ERD) | [ ] / [x] | Ảnh ERD chốt | |
-| API Quản lý Danh mục & Sản phẩm (CRUD) | [ ] / [x] | API trả về danh sách sản phẩm từ Postgres | DTO + Exception Filter |
-| API Bộ lọc & Tìm kiếm | [ ] / [x] | Lọc theo query params (giá, size, màu) | |
-| Seed dữ liệu mẫu | [ ] / [x] | Script bơm dữ liệu demo vào DB | |
+| Xây dựng MCP Server `react-mcp` đọc repo FE | [x] / [x] | [`react-mcp/`](https://github.com/bine910/back/tree/main/react-mcp) — MCP server read-only kết nối repo `dangle10/react`, cung cấp tools: `get_component_list`, `get_component_code`, `get_component_props`, `get_diff`, `get_commit_history`. | Cho phép AI đọc trực tiếp code FE mà không cần chuyển repo. |
+| Định nghĩa Skill `react-mcp` cho Claude Code | [x] / [x] | [`.claude/skills/mcp-react/SKILL.md`](https://github.com/bine910/back/blob/main/.claude/skills/mcp-react/SKILL.md) — hướng dẫn AI khi nào dùng tool nào, workflow 5 bước từ đọc FE → code NestJS cho khớp. | Tự động trigger khi tạo endpoint/DTO mới. |
+| Cấu hình `CLAUDE.md` — project instructions cho AI | [x] / [x] | [`CLAUDE.md`](https://github.com/bine910/back/blob/main/CLAUDE.md) — định nghĩa vai trò backend dev, rules bắt buộc đọc FE trước khi tạo endpoint, workflow chuẩn tích hợp MCP. | Đảm bảo AI không đoán API mà phải đọc code FE thực tế. |
 
 ---
 
-### Tuần 8 – Tích hợp Frontend & Luồng mua sắm
+### Tuần 8 – Bắt đầu làm Product
+Mục tiêu: Áp dụng kiến thức để code nghiệp vụ lõi.
+
+**Link Back-end:** https://github.com/bine910/back
+
+| Nhiệm vụ | Trạng thái | Kết quả đầu ra | Ghi chú |
+|---------|-----------|---------------|--------|
+| Thiết kế CSDL hoàn chỉnh (ERD) | [x] / [x] | [18 entities: User, Product, ProductVariant, Order, Cart, Wishlist...](https://github.com/bine910/back/tree/main/back/src/entities) | TypeORM, PostgreSQL 15 |
+| API Quản lý Danh mục & Sản phẩm (CRUD) | [x] / [x] | [product.controller.ts](https://github.com/bine910/back/blob/main/back/src/modules/product/product.controller.ts) — 8 endpoints (CRUD, cards, trending, suggestions, open-page) | DTO + ValidationPipe |
+| API Bộ lọc & Tìm kiếm | [x] / [x] | [product-card-filter-query.dto.ts](https://github.com/bine910/back/blob/main/back/src/modules/product/dto/product-card-filter-query.dto.ts) — `GET /products/cards` lọc theo minPrice, maxPrice, brandIds, colors, minDiscount, sortBy, page | Phân trang + sắp xếp |
+| Seed dữ liệu mẫu | [x] / [x] | [seed.sql](https://github.com/bine910/back/blob/main/back/seed.sql) (10 brands, 15 products + variants/images) · [seed-wishlist-cart.sql](https://github.com/bine910/back/blob/main/back/seed-wishlist-cart.sql) | Chạy qua TypeORM migration |
+
+---
+
+### Tuần 9 – Tích hợp Frontend & Luồng mua sắm
 Mục tiêu: Hỗ trợ frontend và hoàn thiện luồng mua hàng.
 
 | Nhiệm vụ | Trạng thái | Kết quả đầu ra | Ghi chú |
 |---------|-----------|---------------|--------|
-| Hỗ trợ Frontend (CORS, docs) | [ ] / [x] | Frontend hiển thị Home/Product từ API | CORS enabled |
-| API Giỏ hàng (Cart) | [ ] / [x] | Thêm, sửa số lượng, xóa sản phẩm trong cart | |
-| API Wishlist (Yêu thích) | [ ] / [x] | Lưu sản phẩm user yêu thích | Dùng JwtAuthGuard |
+| Hỗ trợ Frontend (CORS, docs) | [x] / [x] | [main.ts](https://github.com/bine910/back/blob/main/back/src/main.ts) — CORS `*`, Swagger tại `/api` với Bearer Auth | Port 5000 |
+| API Giỏ hàng (Cart) | [x] / [x] | [cart.controller.ts](https://github.com/bine910/back/blob/main/back/src/modules/cart/cart.controller.ts) — `GET /cart`, `POST /cart` (add/tăng SL), `DELETE /cart/:id` | JwtAuthGuard; trả về CartResponseDto |
+| API Wishlist (Yêu thích) | [x] / [x] | [wishlist.controller.ts](https://github.com/bine910/back/blob/main/back/src/modules/wishlist/wishlist.controller.ts) — `POST /wishlist`, `POST /wishlist/remove`, `GET /wishlist` | JwtAuthGuard |
 
 ---
 
-### Tuần 9 – Đặt hàng, Đóng gói & Tài liệu
+### Tuần 10 – Đặt hàng, Đóng gói & Tài liệu
 | Nhiệm vụ | Trạng thái | Kết quả đầu ra | Ghi chú |
 |---------|-----------|---------------|--------|
-| API Đặt hàng (Checkout) & Lịch sử | [ ] / [x] | Tạo Order, cập nhật trạng thái đơn | |
-| Tích hợp Swagger / OpenAPI | [ ] / [x] | /api/docs hiển thị toàn bộ API | |
-| Đóng gói Docker cả Backend & DB | [ ] / [x] | docker-compose up chạy được toàn hệ thống | |
+| API Đặt hàng (Checkout) & Lịch sử | [ ] / [x] | Entity đã thiết kế: [order.entity.ts](https://github.com/bine910/back/blob/main/back/src/entities/order.entity.ts), [order-item.entity.ts](https://github.com/bine910/back/blob/main/back/src/entities/order-item.entity.ts), [payment.entity.ts](https://github.com/bine910/back/blob/main/back/src/entities/payment.entity.ts) | Controller chưa implement |
+| Tích hợp Swagger / OpenAPI | [x] / [x] | [main.ts – Swagger setup](https://github.com/bine910/back/blob/main/back/src/main.ts) — `/api` hiển thị toàn bộ endpoint, hỗ trợ Bearer JWT | Swagger DTOs đầy đủ |
+| Đóng gói Docker cả Backend & DB | [x] / [x] | [docker-compose.yml](https://github.com/bine910/back/blob/main/docker-compose.yml) — PostgreSQL 15 Alpine, volume `back_postgres_data`, env từ `.env` | `docker-compose up` chạy được DB |
 
 ---
 
-### Tuần 10 – Tổng kết
+### Tuần 11 – Tổng kết
 | Nhiệm vụ | Trạng thái | Kết quả đầu ra | Ghi chú |
 |---------|-----------|---------------|--------|
 | Review code & Refactor | [ ] / [x] | Code sạch, xử lý edge-cases | Vibe-coding |
